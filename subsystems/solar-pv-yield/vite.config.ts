@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const apiProxy = {
-  target: 'http://localhost:3001',
+  target: process.env.SOLAR_API_URL || process.env.API_URL || 'http://localhost:3001',
   changeOrigin: true,
   secure: false
 };

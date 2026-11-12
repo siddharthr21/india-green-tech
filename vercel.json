@@ -1,0 +1,67 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "app": {
+      "root": ".",
+      "framework": "vite"
+    },
+    "enerjee": {
+      "root": "subsystems/enerjee",
+      "framework": "vite"
+    },
+    "api": {
+      "root": "subsystems/india-energy-data/api",
+      "framework": "fastapi"
+    },
+    "scrapers": {
+      "root": "subsystems/india-energy-data/scrapers",
+      "runtime": "python"
+    },
+    "web": {
+      "root": "subsystems/india-energy-data/web",
+      "framework": "nextjs",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "api",
+          "format": "url",
+          "env": "BACKEND_ORIGIN"
+        }
+      ]
+    },
+    "solar-pv-yield": {
+      "root": "subsystems/solar-pv-yield",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "subsystems/suryacheck/backend",
+      "framework": "fastapi"
+    },
+    "web-2": {
+      "root": "subsystems/suryacheck/web",
+      "framework": "nextjs",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "backend",
+          "format": "url",
+          "env": "BACKEND_URL"
+        }
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "app"
+      }
+    }
+  ]
+}

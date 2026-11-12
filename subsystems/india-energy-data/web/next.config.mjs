@@ -13,7 +13,7 @@
 // Trimmed because pasting into a dashboard env-var field routinely picks up a
 // leading tab/newline, and Next.js then rejects the rewrite with a confusing
 // "does not start with /, http://, or https://" (the value did — after a \t).
-const backend = process.env.BACKEND_ORIGIN?.trim();
+const backend = process.env.BACKEND_ORIGIN?.trim().replace(/\/+$/, "");
 
 if (backend && !/^https?:\/\//.test(backend)) {
   throw new Error(
