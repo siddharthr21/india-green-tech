@@ -171,8 +171,12 @@ app.post('/api/mentor/chat', (req, res) => {
   }
 });
 
+import fs from 'fs';
+
 // Serve static frontend files in production
-const distPath = path.resolve(__dirname, '../dist');
+const distPath = fs.existsSync(path.resolve(__dirname, '..', 'index.html'))
+  ? path.resolve(__dirname, '..')
+  : path.resolve(__dirname, '../dist');
 app.use(express.static(distPath));
 
 app.get('*', (req, res) => {
