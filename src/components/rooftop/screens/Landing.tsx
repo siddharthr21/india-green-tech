@@ -430,6 +430,21 @@ export function Landing({ onPlace }: { onPlace: (place: Place) => void }) {
                 className="h-12 min-w-0 flex-1 bg-transparent text-lg text-ink outline-none placeholder:text-ink-soft/70"
               />
               <button
+                type="button"
+                onClick={locate}
+                disabled={busy !== null}
+                title="Use current GPS location"
+                aria-label="Use current GPS location"
+                className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-teal-soft px-3 text-sm font-semibold text-teal-deep transition hover:bg-teal-deep hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sun/40 disabled:opacity-60"
+              >
+                {busy === 'locate' ? (
+                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <LocateFixed className="size-4" aria-hidden="true" />
+                )}
+                <span className="max-sm:hidden">{busy === 'locate' ? 'Locating…' : 'Current Location'}</span>
+              </button>
+              <button
                 type="submit"
                 aria-label="Search this address"
                 disabled={busy !== null}
@@ -495,9 +510,9 @@ export function Landing({ onPlace }: { onPlace: (place: Place) => void }) {
               </div>
             )}
 
-            <Button variant="secondary" onClick={locate} disabled={busy !== null}>
+            <Button variant="secondary" onClick={locate} disabled={busy !== null} className="font-bold border-2 border-teal-deep text-teal-deep hover:bg-teal-soft">
               {busy === 'locate' ? <LoaderCircle className="size-5 animate-spin" aria-hidden="true" /> : <LocateFixed className="size-5" aria-hidden="true" />}
-              {busy === 'locate' ? 'Finding you…' : 'Use my location'}
+              {busy === 'locate' ? 'Finding your GPS coordinates…' : 'Use Current Location (GPS)'}
             </Button>
             <ul className="flex flex-wrap gap-x-5 gap-y-1 pt-1 text-sm font-semibold text-ink-soft" aria-label="Good to know">
               {['Free', 'No sign-up', 'Real sunshine data'].map((t) => (

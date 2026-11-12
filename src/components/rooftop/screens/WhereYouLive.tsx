@@ -1,4 +1,4 @@
-import { ArrowRight, Info, MapPin } from 'lucide-react'
+import { ArrowRight, Info, MapPin, LocateFixed } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from '../Button'
 import { Card } from '../Card'
@@ -65,9 +65,26 @@ export function WhereYouLive({
 
       <div className="relative">
         <SatelliteMap frame={center} interactive centerPin initialZoom={19} onMoveEnd={onPinMove} ariaLabel="Satellite map. Move the map so the pin sits on your house." />
-        <p className="pointer-events-none absolute left-3 top-3 z-[600] max-w-[calc(100%-5rem)] rounded-2xl bg-white/95 px-3.5 py-1.5 text-sm font-semibold text-ink shadow-md">
+        <p className="pointer-events-none absolute left-3 top-3 z-[600] max-w-[calc(100%-11rem)] rounded-2xl bg-white/95 px-3.5 py-1.5 text-sm font-semibold text-ink shadow-md">
           Move the map until the pin is on your house
         </p>
+        <button
+          type="button"
+          onClick={() => {
+            if ('geolocation' in navigator) {
+              navigator.geolocation.getCurrentPosition(
+                ({ coords }) => onPinMove({ lat: coords.latitude, lng: coords.longitude }),
+                () => {},
+                { enableHighAccuracy: true, timeout: 15000 }
+              )
+            }
+          }}
+          className="absolute right-3 top-3 z-[600] flex items-center gap-1.5 rounded-2xl bg-white px-3 py-1.5 text-xs font-bold text-teal-deep shadow-md hover:bg-teal-soft transition border border-teal-deep/30"
+          title="Jump to current GPS location"
+        >
+          <LocateFixed className="size-4 text-teal-deep" />
+          <span>Current Location</span>
+        </button>
       </div>
       </div>
 
