@@ -443,20 +443,62 @@ export function PlanScreen({
         </section>
       )}
 
-      <Card className="flex flex-col gap-2 border-l-4 border-teal-deep bg-teal-soft text-teal-deep">
-        <p className="flex items-start gap-2 text-sm font-medium">
+      {/* PM Surya Ghar CFA Detailed Breakdown */}
+      <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-amber-900/10">
+        <div className="flex items-center justify-between border-b border-amber-900/10 pb-2">
+          <div className="flex items-center gap-2">
+            <Landmark className="size-5 text-teal-deep" aria-hidden="true" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-teal-deep">
+              PM Surya Ghar: Muft Bijli Yojana CFA
+            </h3>
+          </div>
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
+            Official MNRE Rates
+          </span>
+        </div>
+
+        <div className="space-y-2 text-xs text-ink-soft">
+          <div className="flex items-center justify-between py-1 border-b border-dashed border-gray-200">
+            <span>First 2 kW Capacity (₹30,000 / kW)</span>
+            <span className="font-semibold text-ink">
+              {eligible ? inr(Math.min(numbers.kWp, 2) * 30000) : '₹0'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-1 border-b border-dashed border-gray-200">
+            <span>3rd kW Capacity (₹18,000 / kW)</span>
+            <span className="font-semibold text-ink">
+              {eligible ? inr(Math.max(0, Math.min(numbers.kWp, 3) - 2) * 18000) : '₹0'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-1 border-b border-dashed border-gray-200">
+            <span>Central CFA Cap (at 3 kW & above)</span>
+            <span className="font-semibold text-ink">₹78,000</span>
+          </div>
+          {subsidyRules.statePerKw > 0 && (
+            <div className="flex items-center justify-between py-1 border-b border-dashed border-gray-200 text-teal-800">
+              <span>State Top-up Subsidy</span>
+              <span className="font-semibold text-teal-900">
+                + {inr(finance.stateSubsidy ?? 0)}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center justify-between py-1.5 font-bold text-sm text-teal-deep bg-teal-50 px-2 rounded-lg">
+            <span>Total Applied Govt Subsidy (DBT)</span>
+            <span className="text-base text-emerald-700">
+              {eligible ? inr(finance.subsidy) : 'Not Eligible'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 rounded-xl bg-teal-soft/60 p-2.5 text-xs text-teal-deep">
           <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {subsidyNote}
-        </p>
-        {finance.notes.map((n) => (
-          <p key={n} className="pl-6 text-sm">{n}</p>
-        ))}
-        {finance.source === 'local' && <p className="pl-6 text-sm">Money figures are a rough on-device guess until we reach the server.</p>}
-        <p className="pl-6 text-sm">
-          A bigger system is not always a better deal beyond 3 kW, because the subsidy stops growing
-          there.
-        </p>
-      </Card>
+          <p>
+            {eligible
+              ? `Disbursed directly via DBT into your bank account through the National Portal (pmsuryaghar.gov.in) post-inspection.`
+              : `Central CFA requires an individual residential grid-connected meter in your own house.`}
+          </p>
+        </div>
+      </div>
 
       <div className="flex flex-col gap-3">
         <Button onClick={onScan} className="min-h-14 text-lg">

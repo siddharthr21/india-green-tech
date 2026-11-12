@@ -5,6 +5,8 @@ export interface FinanceResult {
   eligible: boolean
   costRange: Range
   subsidy: number
+  centralSubsidy: number
+  stateSubsidy: number
   netCostRange: Range
   savingsYearRange: Range
   paybackRange: Range
@@ -50,7 +52,9 @@ export function calcFinance(
   const extra = Math.max(0, kWp - 1)
   const lo = Math.round(first * params.firstKwRange[0] + extra * params.extraKwRange[0])
   const hi = Math.round(first * params.firstKwRange[1] + extra * params.extraKwRange[1])
-  const subsidy = eligible ? Math.round(subsidyFor(kWp, params.subsidy) + stateTopUpFor(kWp, params.subsidy)) : 0
+  const centralSubsidy = eligible ? Math.round(subsidyFor(kWp, params.subsidy)) : 0
+  const stateSubsidy = eligible ? Math.round(stateTopUpFor(kWp, params.subsidy)) : 0
+  const subsidy = centralSubsidy + stateSubsidy
   const netCostRange: Range = [Math.max(0, lo - subsidy), Math.max(0, hi - subsidy)]
 
   const offset = consumptionKwhYear && consumptionKwhYear > 0 ? Math.min(kWhYear, consumptionKwhYear) : kWhYear
@@ -66,6 +70,8 @@ export function calcFinance(
     eligible,
     costRange: [lo, hi],
     subsidy,
+    centralSubsidy,
+    stateSubsidy,
     netCostRange,
     savingsYearRange: [savings, savings],
     paybackRange: paybackYears(rawPayback),
@@ -123,6 +129,8 @@ export function financeFromApi(r: FinanceResponse): FinanceResult {
     eligible: r.subsidyBreakdown.eligible,
     costRange: r.costRange,
     subsidy: r.subsidy,
+    centralSubsidy: r.subsidyBreakdown.central,
+    stateSubsidy: r.subsidyBreakdown.state,
     netCostRange: r.netCostRange,
     savingsYearRange: [r.savingsYear, r.savingsYear],
     paybackRange: paybackYears(r.paybackRange),
