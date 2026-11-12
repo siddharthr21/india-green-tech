@@ -31,7 +31,11 @@ export const App: React.FC = () => {
       />
 
       {/* Main Container */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8">
+      <main className={`flex-grow w-full mx-auto ${
+        activeTab === 'rooftop' || activeTab === 'pv-yield' || activeTab === 'grid'
+          ? 'max-w-[1440px] px-2 sm:px-4 py-4 sm:py-6'
+          : 'max-w-7xl px-4 py-8'
+      }`}>
         {activeTab === 'overview' && (
           <OverviewView setActiveTab={setActiveTab} gridSummary={gridSummary} />
         )}

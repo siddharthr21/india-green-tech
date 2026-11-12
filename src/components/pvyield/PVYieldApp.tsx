@@ -144,7 +144,7 @@ function App() {
   }
 
   return (
-    <main>
+    <div className="pvyield-main">
       <header className="app-header">
         <div>
           <p className="eyebrow">Residential PV estimator</p>
@@ -272,7 +272,7 @@ function App() {
           />
         </>
       ) : <EmptyState />}
-    </main>
+    </div>
   );
 }
 

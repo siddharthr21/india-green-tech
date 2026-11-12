@@ -69,7 +69,7 @@ function DesktopNav({
   navRight?: ReactNode
 }) {
   return (
-    <header className="sticky top-0 z-30 hidden h-16 border-b border-amber-900/10 bg-white/90 backdrop-blur lg:block">
+    <header className="relative z-20 hidden h-16 border-b border-amber-900/10 bg-white/95 lg:block">
       <div className="mx-auto grid h-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-8">
         <div className="flex items-center gap-4">
           <Logo onHome={onHome} />
@@ -156,7 +156,7 @@ export function focusAddress() {
 
 function LandingNav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-amber-900/10 bg-cream/90 backdrop-blur">
+    <header className="relative z-20 border-b border-amber-900/10 bg-cream/90">
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between gap-4 px-5 lg:px-8">
         <Logo tagline />
         <nav aria-label="Page sections" className="hidden items-center gap-1 lg:flex">
@@ -233,7 +233,7 @@ function LandingFooter() {
       <div className="border-t border-amber-900/10">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-1 px-5 py-5 text-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <p>
-            © {year} Rooftop Solar Planner · Made by <span className="font-semibold text-ink">Swastik Kaushal</span>
+            © {year} Rooftop Solar Planner
           </p>
           <p>Estimates, not quotations.</p>
         </div>
@@ -266,7 +266,7 @@ export function AppShell({
   const total = DESKTOP_STEPS.length
   return (
     <div className="flex min-h-dvh justify-center bg-sand lg:block lg:bg-cream">
-      <div className={cn('flex min-h-dvh w-full flex-col bg-cream sm:shadow-2xl lg:max-w-none lg:shadow-none', landing ? 'max-w-none font-display' : 'max-w-[430px]')}>
+      <div className={cn('flex min-h-dvh w-full flex-col bg-cream sm:shadow-2xl lg:max-w-none lg:shadow-none', landing ? 'max-w-none font-display' : 'w-full max-w-full lg:max-w-none')}>
         {landing ? (
           <LandingNav />
         ) : (
@@ -323,7 +323,7 @@ export function AppShell({
           <LandingFooter />
         ) : (
           <footer className="px-5 pb-8 pt-2 text-center text-sm font-medium text-ink-soft">
-            Estimates, not quotations. · Made by Swastik Kaushal
+            Estimates, not quotations.
           </footer>
         )}
       </div>
