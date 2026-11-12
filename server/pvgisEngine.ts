@@ -1,4 +1,4 @@
-// Precision Multi-Array Solar PV Yield Simulator and PVGIS proxy
+// Precision Multi-Array PV Array Yield Studio Simulator and PVGIS proxy
 import { PVSimulationInput, PVSimulationResult } from '../shared/types';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

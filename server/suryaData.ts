@@ -1,4 +1,4 @@
-// SuryaCheck rooftop solar, obstacle shadow modeling, and PM Surya Ghar subsidy calculator
+// Rooftop Solar Planner rooftop solar, obstacle shadow modeling, and PM Surya Ghar subsidy calculator
 import { RooftopCalculationInput, RooftopCalculationResult } from '../shared/types';
 
 export const STATE_TARIFFS: Record<string, { name: string; tariffRsPerKwh: number; stateSubsidyPerKw: number; stateSubsidyCap: number }> = {

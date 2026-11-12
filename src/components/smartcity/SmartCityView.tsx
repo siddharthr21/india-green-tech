@@ -56,7 +56,7 @@ export const SmartCityView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              EnerJee Smart City Simulator
+              Regional Energy Planner Smart City Simulator
             </span>
             <span className="text-xs text-slate-400">Municipal Clean Energy Capital Allocation</span>
           </div>

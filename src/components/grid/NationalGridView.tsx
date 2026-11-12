@@ -73,7 +73,7 @@ export const NationalGridView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              India Electricity Data Integration
+              National Grid Telemetry Integration
             </span>
             <span className="text-xs text-slate-400 flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-slate-500" />

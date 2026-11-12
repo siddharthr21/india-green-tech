@@ -21,19 +21,19 @@ export const Footer: React.FC = () => {
           <h4 className="font-semibold text-slate-200 mb-3 text-sm">Integrated Applications</h4>
           <ul className="space-y-2">
             <li>
-              <span className="font-medium text-slate-300">India Electricity Data</span>
+              <span className="font-medium text-slate-300">National Grid Telemetry</span>
               <p className="text-[11px] text-slate-500">Live 32-state demand & fuel mix telemetry</p>
             </li>
             <li>
-              <span className="font-medium text-slate-300">EnerJee Platform</span>
+              <span className="font-medium text-slate-300">Regional Energy Planner Platform</span>
               <p className="text-[11px] text-slate-500">Regional forecasting & Smart City simulator</p>
             </li>
             <li>
-              <span className="font-medium text-slate-300">SuryaCheck</span>
+              <span className="font-medium text-slate-300">Rooftop Solar Planner</span>
               <p className="text-[11px] text-slate-500">Rooftop solar, shadow modeling & PM Surya Ghar subsidy</p>
             </li>
             <li>
-              <span className="font-medium text-slate-300">Solar PV Yield App</span>
+              <span className="font-medium text-slate-300">PV Array Yield Studio</span>
               <p className="text-[11px] text-slate-500">Multi-string azimuth & PVGIS engineering</p>
             </li>
           </ul>

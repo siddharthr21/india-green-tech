@@ -1,4 +1,4 @@
-// EnerJee regional renewable forecasting & multi-objective Pareto optimization engine
+// Regional Energy Planner regional renewable forecasting & multi-objective Pareto optimization engine
 import { OptimizationResult, HourlyForecastPoint } from '../shared/types';
 
 interface CityCharacteristics {

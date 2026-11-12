@@ -69,7 +69,7 @@ export const RegionalPlannerView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              EnerJee Integration
+              Regional Energy Planner Integration
             </span>
             <span className="text-xs text-slate-400">Multi-objective Pareto Optimization Engine</span>
           </div>

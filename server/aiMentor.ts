@@ -49,7 +49,7 @@ India has surpassed **200 GW of non-fossil fuel capacity** on its way to the **5
 Key highlights across our integrated platform:
 1. **National Grid:** Track live 32-state demand and clean energy mix.
 2. **Regional Planner:** Run multi-objective optimization balancing cost against emissions for major regional hubs.
-3. **Rooftop Solar (SuryaCheck):** Model roof obstacles, shadow clearance, and PM Surya Ghar subsidies.
+3. **Rooftop Solar (Rooftop Solar Planner):** Model roof obstacles, shadow clearance, and PM Surya Ghar subsidies.
 4. **PV Yield Studio:** Engineer precision multi-array orientations with true-north compass and PVGIS solar modeling.
 
 What specific aspect of clean energy planning or grid telemetry would you like to explore?`;

@@ -15,12 +15,12 @@
 
 | Application & Source | Integration Scope & Features |
 |---|---|
-| **⚡ National Grid Telemetry** *(from India Energy Data)* | Real-time demand met, generation fuel mix (Coal, Solar, Wind, Hydro, Nuclear, Biomass, Gas), and carbon intensity across all 32 Indian States/UTs. Includes SCADA measured vs MERIT estimated freshness ladder and 24h historical charts. |
-| **🏙️ Regional Renewable Planner** *(from EnerJee)* | Multi-objective Pareto optimization engine trading off levelized cost (₹/MWh) against carbon emissions (gCO2/kWh). Simulates hourly solar, wind, and hydro generation profiles across 7 Indian hubs (Jodhpur, Bangalore, Chennai, Kutch, Uttarakashi, Satara, Delhi NCR). |
-| **🎮 Smart City Clean Energy Simulator** *(from EnerJee)* | Municipal capital budget allocation across Solar PV, Wind, Hydro, and Battery Storage. Stress-tests urban grid resilience against simulated monsoons, heatwaves, and peak load surges to compute public satisfaction and national green rankings. |
-| **☀️ Rooftop Solar & Subsidy Engine** *(from SuryaCheck)* | Rooftop feasibility tool for Indian RCC roofs. Places obstacles (water tanks, staircase mumties) and computes 3D shadow buffers, auto-packs 550W TopCon panels, and calculates **PM Surya Ghar: Muft Bijli Yojana** central subsidies (up to ₹78,000) + state top-ups (Delhi, UP) with 25-year financial ROI. |
-| **📐 Precision PV Yield Studio** *(from Solar PV Yield Estimator)* | Multi-string solar array design (East string, South string, West string), true-north azimuth compass, tilt angle adjustments, system losses, and monthly yield simulation against European Commission PVGIS models. |
-| **🤖 AI Clean Energy Mentor** *(EnerJeePT / GridGPT)* | Intelligent advisory assistant trained on Indian grid codes, CERC merit order dispatch, state DISCOM tariffs, and PM Surya Ghar eligibility guidelines. |
+| **⚡ National Grid Telemetry** *(from National Grid Telemetry)* | Real-time demand met, generation fuel mix (Coal, Solar, Wind, Hydro, Nuclear, Biomass, Gas), and carbon intensity across all 32 Indian States/UTs. Includes SCADA measured vs MERIT estimated freshness ladder and 24h historical charts. |
+| **🏙️ Regional Renewable Planner** *(from Regional Energy Planner)* | Multi-objective Pareto optimization engine trading off levelized cost (₹/MWh) against carbon emissions (gCO2/kWh). Simulates hourly solar, wind, and hydro generation profiles across 7 Indian hubs (Jodhpur, Bangalore, Chennai, Kutch, Uttarakashi, Satara, Delhi NCR). |
+| **🎮 Smart City Clean Energy Simulator** *(from Regional Energy Planner)* | Municipal capital budget allocation across Solar PV, Wind, Hydro, and Battery Storage. Stress-tests urban grid resilience against simulated monsoons, heatwaves, and peak load surges to compute public satisfaction and national green rankings. |
+| **☀️ Rooftop Solar & Subsidy Engine** *(from Rooftop Solar Planner)* | Rooftop feasibility tool for Indian RCC roofs. Places obstacles (water tanks, staircase mumties) and computes 3D shadow buffers, auto-packs 550W TopCon panels, and calculates **PM Surya Ghar: Muft Bijli Yojana** central subsidies (up to ₹78,000) + state top-ups (Delhi, UP) with 25-year financial ROI. |
+| **📐 Precision PV Yield Studio** *(from PV Array Yield Studio)* | Multi-string solar array design (East string, South string, West string), true-north azimuth compass, tilt angle adjustments, system losses, and monthly yield simulation against European Commission PVGIS models. |
+| **🤖 AI Clean Energy Mentor** *(Clean Energy Advisor / GridGPT)* | Intelligent advisory assistant trained on Indian grid codes, CERC merit order dispatch, state DISCOM tariffs, and PM Surya Ghar eligibility guidelines. |
 
 ---
 
@@ -33,9 +33,9 @@ india_green_grid/
 │   │   ├── common/       # Global Navbar with live grid ticker, Footer
 │   │   ├── overview/     # Executive Command Center dashboard
 │   │   ├── grid/         # Live 32-state National Grid telemetry & charts
-│   │   ├── planner/      # EnerJee regional renewable Pareto optimizer
+│   │   ├── planner/      # Regional Energy Planner regional renewable Pareto optimizer
 │   │   ├── smartcity/    # Municipal clean energy capital allocation sim
-│   │   ├── rooftop/      # SuryaCheck obstacle shadow & subsidy engine
+│   │   ├── rooftop/      # Rooftop Solar Planner obstacle shadow & subsidy engine
 │   │   ├── pvyield/      # Precision multi-array compass & PVGIS studio
 │   │   └── mentor/       # AI Clean Energy Mentor chat interface
 │   ├── lib/              # API clients and calculations
@@ -52,10 +52,10 @@ india_green_grid/
 ├── shared/
 │   └── types.ts          # Shared TypeScript contracts & schemas
 ├── subsystems/           # Preserved standalone modules and scraper packages
-│   ├── enerjee/          # Original EnerJee React/Postgres codebase
+│   ├── planner/          # Original Regional Energy Planner React/Postgres codebase
 │   ├── india-energy-data/# Original Python gridscrapers, TimescaleDB & Next.js
-│   ├── solar-pv-yield/   # Original PV yield estimator and PVGIS proxy
-│   └── suryacheck/       # Original SuryaCheck FastAPI backend & Next.js web
+│   ├── pv-array-yield/   # Original PV yield estimator and PVGIS proxy
+│   └── rooftop/       # Original Rooftop Solar Planner FastAPI backend & Next.js web
 ├── package.json          # Root build & scripts
 ├── vite.config.ts        # Vite build configuration
 ├── tailwind.config.js    # Tailwind styling config

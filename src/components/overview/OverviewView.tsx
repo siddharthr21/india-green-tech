@@ -127,7 +127,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Card 1: India Energy Data */}
+          {/* Card 1: National Grid Telemetry */}
           <div 
             onClick={() => setActiveTab('grid')}
             className="glass-panel p-6 rounded-xl border border-slate-800 hover:border-emerald-500/50 transition-all cursor-pointer group flex flex-col justify-between"
@@ -138,7 +138,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white mb-1">National Grid Telemetry</h3>
-                <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">India Energy Data</span>
+                <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">National Grid Telemetry</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
                 State-wise live electricity demand, generation mix (coal, solar, wind, hydro, nuclear), carbon intensity for all 32 states/UTs with freshness ladder.
@@ -154,7 +154,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
             </div>
           </div>
 
-          {/* Card 2: EnerJee Planner */}
+          {/* Card 2: Regional Energy Planner Planner */}
           <div 
             onClick={() => setActiveTab('planner')}
             className="glass-panel p-6 rounded-xl border border-slate-800 hover:border-teal-500/50 transition-all cursor-pointer group flex flex-col justify-between"
@@ -165,7 +165,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white mb-1">Regional Renewable Planner</h3>
-                <span className="text-[10px] bg-teal-950 text-teal-400 border border-teal-800 px-2 py-0.5 rounded font-mono">EnerJee</span>
+                <span className="text-[10px] bg-teal-950 text-teal-400 border border-teal-800 px-2 py-0.5 rounded font-mono">Regional Energy Planner</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
                 Forecast solar, wind, and hydro for Indian regions (Jodhpur, Bangalore, Chennai, Kutch, Uttarakashi, Satara). Trade cost against emissions with Pareto optimization.
@@ -181,7 +181,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
             </div>
           </div>
 
-          {/* Card 3: SuryaCheck Rooftop */}
+          {/* Card 3: Rooftop Solar Planner Rooftop */}
           <div 
             onClick={() => setActiveTab('rooftop')}
             className="glass-panel p-6 rounded-xl border border-slate-800 hover:border-amber-500/50 transition-all cursor-pointer group flex flex-col justify-between"
@@ -192,7 +192,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white mb-1">Rooftop Solar & Subsidy</h3>
-                <span className="text-[10px] bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded font-mono">SuryaCheck</span>
+                <span className="text-[10px] bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded font-mono">Rooftop Solar Planner</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
                 Calculate how many panels fit on real flat Indian roofs with water tanks and staircase mumties. Exact PM Surya Ghar subsidies and 25-year ROI.
@@ -219,7 +219,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white mb-1">Precision PV Yield Studio</h3>
-                <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded font-mono">Solar PV Yield</span>
+                <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded font-mono">PV Array Yield Studio</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
                 Multi-string array engineering (East, North, South strings), true-north azimuth compass, PVGIS hourly solar modeling, and self-consumption economics.
@@ -246,7 +246,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white mb-1">Smart City Simulator</h3>
-                <span className="text-[10px] bg-purple-950 text-purple-400 border border-purple-800 px-2 py-0.5 rounded font-mono">EnerJee Sim</span>
+                <span className="text-[10px] bg-purple-950 text-purple-400 border border-purple-800 px-2 py-0.5 rounded font-mono">Regional Energy Planner Sim</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
                 Municipal energy budget allocation across Solar, Wind, Hydro, and Storage. Test city resilience against simulated heatwaves, monsoons, and grid events.
@@ -273,7 +273,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({ setActiveTab, gridSu
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white mb-1">AI Energy Mentor</h3>
-                <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">EnerJeePT</span>
+                <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">Clean Energy Advisor</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
                 Specialized clean energy advisory assistant trained on Indian grid codes, CERC merit order dispatch, DISCOM tariffs, and PM Surya Ghar subsidies.

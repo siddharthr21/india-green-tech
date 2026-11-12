@@ -13,7 +13,7 @@ export const MentorView: React.FC = () => {
     {
       id: 'init-1',
       sender: 'assistant',
-      text: `### Namaste! I am your AI Clean Energy Mentor (EnerJeePT / GridMentor) 🇮🇳
+      text: `### Namaste! I am your AI Clean Energy Mentor (Clean Energy Advisor / GridMentor) 🇮🇳
 
 I can assist you with:
 - **PM Surya Ghar: Muft Bijli Yojana** subsidies, slab brackets & DISCOM applications
@@ -67,7 +67,7 @@ Ask me any question below, or tap one of the suggested prompts!`
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-white tracking-tight">AI Clean Energy Mentor</h1>
               <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">
-                EnerJeePT v1.0
+                Clean Energy Advisor v1.0
               </span>
             </div>
             <p className="text-xs text-slate-400">

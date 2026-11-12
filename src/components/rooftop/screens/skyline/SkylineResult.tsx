@@ -1,0 +1,421 @@
+import { Camera, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { PairWithPhone } from './PairWithPhone'
+import { SweepDemo } from './SweepDemo'
+import { askMotionPermission, canPhoneScan, PhoneScan } from './PhoneScan'
+import { Button } from '../../Button'
+import { Card, SectionTitle } from '../../Card'
+import { NumberField } from '../../NumberField'
+import { Tag } from '../../Tag'
+import { clamp } from '@/lib/geometry'
+import type { Neighbour, SkylineStop } from '@/lib/mockData'
+import { applyScan, blockedRanges, formatHour, horizonAt, horizonFromStops, skylineLossPct, sunPaths, tallestDirection } from '@/lib/solar'
+import { cn } from '@/lib/utils'
+
+const W = 340
+const H = 200
+const LEFT = 34
+const RIGHT = 332
+const TOP = 12
+const BOTTOM = 168
+const MAX_ELEV = 45
+const MAX_STOPS = 9
+
+/** Quick starting points for people who do not know skyline angles. Keys are compass bearings. */
+const PRESETS: { label: string; hint: string; heights: Record<number, number> }[] = [
+  { label: 'Open sky', hint: 'Nothing tall nearby', heights: { 90: 3, 135: 3, 180: 3, 225: 3, 270: 3 } },
+  { label: 'Some buildings or trees around', hint: 'Two or three floors, a few trees', heights: { 90: 16, 135: 13, 180: 10, 225: 13, 270: 16 } },
+  { label: 'Tall buildings close by', hint: 'A crowded lane or apartment blocks', heights: { 90: 32, 135: 28, 180: 22, 225: 28, 270: 32 } },
+]
+
+const SIDE_WORDS: Record<Neighbour['side'], string> = { N: 'north', E: 'east', S: 'south', W: 'west' }
+/** ['E', 'W'] -> "east and west side" */
+const listSides = (sides: Neighbour['side'][]) => {
+  const words = sides.map((s) => SIDE_WORDS[s])
+  const joined = words.length > 1 ? `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}` : words[0]
+  return `${joined} side${words.length > 1 ? 's' : ''}`
+}
+
+/** The chart spans the whole sun track over India: summer sunrise (~63°) to summer sunset (~297°). */
+const FROM = 60
+const TO = 300
+const xOf = (bearing: number) => LEFT + ((bearing - FROM) / (TO - FROM)) * (RIGHT - LEFT)
+const yOf = (elev: number) => BOTTOM - (elev / MAX_ELEV) * (BOTTOM - TOP)
+
+export function SkylineResult({
+  stops,
+  baseHorizon,
+  adjustHorizon,
+  neighbourSides = [],
+  onChange,
+  onReset,
+  onApply,
+  onSkip,
+  latitude = 28.6,
+  standHere,
+}: {
+  /** Map of where the panels will go, so the person knows where to stand for the scan. */
+  standHere?: ReactNode
+  /** House latitude, for the sun's paths on the chart (Delhi if unknown). */
+  latitude?: number
+  stops: SkylineStop[]
+  baseHorizon: number[]
+  /** Drops the parts of the skyline already counted as tall neighbours. */
+  adjustHorizon?: (horizon: number[]) => number[]
+  neighbourSides?: Neighbour['side'][]
+  onChange: (stops: SkylineStop[]) => void
+  onReset: () => void
+  onApply: () => void
+  /** Leave without adding skyline shade. */
+  onSkip?: () => void
+}) {
+  const [selectedId, setSelectedId] = useState(stops[0]?.id ?? '')
+  const svgRef = useRef<SVGSVGElement>(null)
+  const dragging = useRef<string | null>(null)
+
+  // Phone scan: only offered on touch phones with motion sensors (decided after mount, never on the server).
+  const [scanAvailable, setScanAvailable] = useState(false)
+  const [scanning, setScanning] = useState(false)
+  const [scanNote, setScanNote] = useState('')
+  useEffect(() => setScanAvailable(canPhoneScan()), [])
+  const startScan = async () => {
+    setScanNote('')
+    // Asking shows the iPhone prompt. Whatever the answer, open the scanner: it tells the person
+    // within a few seconds if no motion readings arrive, so a wrong "denied" can never block a phone that works.
+    await askMotionPermission()
+    setScanning(true)
+  }
+  const finishScan = (marks: { bearing: number; elevation: number }[]) => {
+    setScanning(false)
+    const next = applyScan(stops, marks, baseHorizon)
+    onChange(next)
+    setScanNote(
+      `Skyline scanned: ${next.length} points. The sun's paths on the chart turn red where your surroundings hide the sun; drag any point that looks off.`,
+    )
+  }
+
+  const sorted = [...stops].sort((a, b) => a.bearing - b.bearing)
+  const horizon = horizonFromStops(baseHorizon, stops)
+  // The loss we show is the one the plan will use, after leaving out neighbours already counted.
+  const counted = adjustHorizon ? adjustHorizon(horizon) : horizon
+  const lossPct = skylineLossPct(counted)
+  const direction = tallestDirection(counted)
+  const selected = stops.find((s) => s.id === selectedId) ?? sorted[0]
+  // A phone sweep gives many points: draw them small and skip the long list of direction buttons.
+  const dense = stops.length > MAX_STOPS
+  // Where the sun travels on three days of the year, and when the skyline hides it.
+  const paths = sunPaths(horizon, latitude)
+
+  const path = (() => {
+    let d = `M${xOf(FROM)} ${BOTTOM}`
+    for (let b = FROM; b <= TO; b += 10) d += ` L${xOf(b)} ${yOf(horizon[b / 10])}`
+    return `${d} L${xOf(TO)} ${BOTTOM} Z`
+  })()
+
+  const setElevation = (id: string, elevation: number) =>
+    onChange(stops.map((s) => (s.id === id ? { ...s, elevation: clamp(Math.round(elevation), 0, MAX_ELEV) } : s)))
+
+  const elevationFromPointer = (clientY: number) => {
+    const rect = svgRef.current?.getBoundingClientRect()
+    if (!rect) return 0
+    const y = ((clientY - rect.top) / rect.height) * H
+    return ((BOTTOM - y) / (BOTTOM - TOP)) * MAX_ELEV
+  }
+
+  const addStop = () => {
+    if (stops.length >= MAX_STOPS) return
+    const bearings = [FROM, ...sorted.map((s) => s.bearing), TO]
+    let best = { gap: 0, at: 180 }
+    for (let i = 0; i < bearings.length - 1; i++) {
+      const gap = bearings[i + 1] - bearings[i]
+      if (gap > best.gap) best = { gap, at: Math.round((bearings[i] + gap / 2) / 10) * 10 }
+    }
+    const elevation = Math.round(horizonAt(horizon, best.at))
+    const stop: SkylineStop = {
+      id: `stop-added-${best.at}-${stops.length}`,
+      label: `${best.at}°`,
+      bearing: best.at,
+      elevation,
+      scannedElevation: elevation,
+      added: true,
+    }
+    onChange([...stops, stop])
+    setSelectedId(stop.id)
+  }
+
+  const removeStop = (id: string) => {
+    const rest = stops.filter((s) => s.id !== id)
+    onChange(rest)
+    if (selectedId === id) setSelectedId(rest[0]?.id ?? '')
+  }
+
+  return (
+    <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(340px,1fr)] lg:items-start lg:gap-x-8 lg:gap-y-5">
+      <div className="flex flex-col gap-1 lg:col-span-2">
+        <h1 className="text-2xl font-bold text-ink lg:text-3xl">Shade from your surroundings</h1>
+        <p className="text-base text-ink-soft">
+          Tall buildings and trees block low morning and evening sun. Pick what is closest to your street, then drag the dots to fine-tune.
+        </p>
+        {neighbourSides.length > 0 && (
+          <p className="mt-2 rounded-xl bg-teal-soft p-3 text-sm text-teal-deep">
+            {neighbourSides.length > 1
+              ? `You already added tall neighbours on the ${listSides(neighbourSides)}. Their shadows are already in your plan, so anything in those directions no taller than them is not counted again here.`
+              : `You already added a tall neighbour on the ${listSides(neighbourSides)}. Its shadow is already in your plan, so anything in that direction no taller than it is not counted again here.`}
+          </p>
+        )}
+      </div>
+
+      <Card className="flex flex-col gap-2 p-3 lg:sticky lg:top-[5.5rem] lg:p-5">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          className="w-full touch-none select-none"
+          role="group"
+          aria-label="Skyline chart, east to west. Each dot is the height of what you see in that direction."
+        >
+          <rect x={LEFT} y={TOP} width={RIGHT - LEFT} height={BOTTOM - TOP} fill="#FEF3C7" rx="6" />
+          {[0, 15, 30, 45].map((e) => (
+            <g key={e}>
+              <line x1={LEFT} x2={RIGHT} y1={yOf(e)} y2={yOf(e)} stroke="#d6c7a8" strokeWidth="0.6" strokeDasharray="3 3" />
+              <text x={LEFT - 5} y={yOf(e) + 3} textAnchor="end" fontSize="9" fill="#6b5b45">
+                {e}°
+              </text>
+            </g>
+          ))}
+          <path d={path} fill="#0F5C5E" fillOpacity="0.85" stroke="#0a3d3f" strokeWidth="1.5" strokeLinejoin="round" />
+          {/* the sun's paths: amber where it shines on you, red where your surroundings hide it */}
+          <g pointerEvents="none">
+            {paths.map(({ season, points }) => {
+              const dash = season.name === 'winter' ? undefined : season.name === 'equinox' ? '4 3' : '1.5 3'
+              const visible = (p: { azimuth: number; elevation: number }) => p.azimuth >= FROM && p.azimuth <= TO && p.elevation <= MAX_ELEV
+              return points.slice(1).map((p, i) => {
+                const a = points[i]
+                if (!visible(a) || !visible(p)) return null
+                return (
+                  <line
+                    key={`${season.name}-${i}`}
+                    x1={xOf(a.azimuth)}
+                    y1={yOf(a.elevation)}
+                    x2={xOf(p.azimuth)}
+                    y2={yOf(p.elevation)}
+                    stroke={a.blocked || p.blocked ? '#DC2626' : '#D97706'}
+                    strokeWidth={season.name === 'winter' ? 2.4 : 1.8}
+                    strokeDasharray={dash}
+                    strokeLinecap="round"
+                  />
+                )
+              })
+            })}
+            {/* hour marks on the winter path, the one that matters most */}
+            {paths[0].points
+              .filter((p) => Number.isInteger(p.hour) && p.hour % 2 === 0 && p.azimuth >= FROM && p.azimuth <= TO)
+              .map((p) => (
+                <g key={p.hour}>
+                  <circle cx={xOf(p.azimuth)} cy={yOf(p.elevation)} r="2.2" fill={p.blocked ? '#DC2626' : '#D97706'} />
+                  <text x={xOf(p.azimuth)} y={yOf(p.elevation) - 5} textAnchor="middle" fontSize="7.5" fontWeight="700" fill="#6b5b45">
+                    {p.hour > 12 ? p.hour - 12 : p.hour}
+                    {p.hour >= 12 ? 'pm' : 'am'}
+                  </text>
+                </g>
+              ))}
+          </g>
+          {[
+            [90, 'E'],
+            [135, 'SE'],
+            [180, 'S'],
+            [225, 'SW'],
+            [270, 'W'],
+          ].map(([b, l]) => (
+            <text key={l} x={xOf(b as number)} y={BOTTOM + 16} textAnchor="middle" fontSize="10" fontWeight="700" fill="#2b2118">
+              {l}
+            </text>
+          ))}
+          {sorted.map((s) => {
+            const active = s.id === selected?.id
+            const edited = s.elevation !== s.scannedElevation
+            return (
+              <g
+                key={s.id}
+                tabIndex={0}
+                role="slider"
+                aria-label={`${s.label} skyline height`}
+                aria-valuemin={0}
+                aria-valuemax={MAX_ELEV}
+                aria-valuenow={s.elevation}
+                aria-valuetext={`${s.elevation} degrees`}
+                onFocus={() => setSelectedId(s.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                    e.preventDefault()
+                    setElevation(s.id, s.elevation + 1)
+                  }
+                  if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                    e.preventDefault()
+                    setElevation(s.id, s.elevation - 1)
+                  }
+                }}
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture(e.pointerId)
+                  dragging.current = s.id
+                  setSelectedId(s.id)
+                }}
+                onPointerMove={(e) => {
+                  if (dragging.current === s.id) setElevation(s.id, elevationFromPointer(e.clientY))
+                }}
+                onPointerUp={() => {
+                  dragging.current = null
+                }}
+                className="cursor-grab outline-none focus-visible:[&>circle:last-of-type]:stroke-[4px]"
+              >
+                <circle cx={xOf(s.bearing)} cy={yOf(s.elevation)} r={dense ? 8 : 20} fill="transparent" />
+                <circle
+                  cx={xOf(s.bearing)}
+                  cy={yOf(s.elevation)}
+                  r={dense ? (active ? 6 : 3.5) : active ? 9 : 7}
+                  fill={edited ? '#F59E0B' : '#fff'}
+                  stroke={active ? '#2b2118' : '#F59E0B'}
+                  strokeWidth={dense ? 1.5 : 2.5}
+                />
+              </g>
+            )
+          })}
+          <text x={LEFT} y={H - 2} fontSize="8.5" fill="#6b5b45">
+            Looking from east to west, height of buildings and trees
+          </text>
+        </svg>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-soft" aria-hidden="true">
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-5 bg-sun-dark" /> Winter sun</span>
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-5 border-t-2 border-dashed border-sun-dark" /> March / Sept</span>
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-5 border-t-2 border-dotted border-sun-dark" /> Summer</span>
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-5 bg-red-600" /> Hidden by surroundings</span>
+        </div>
+        <ul className="flex flex-col gap-1 text-sm" aria-label="When your surroundings hide the sun">
+          {paths.map(({ season, points }) => {
+            const ranges = blockedRanges(points)
+            const label = season.name === 'winter' ? 'Winter' : season.name === 'equinox' ? 'March / Sept' : 'Summer'
+            return (
+              <li key={season.name} className="flex gap-2">
+                <span className="w-24 shrink-0 font-semibold text-ink">{label}</span>
+                <span className={ranges.length ? 'text-red-800' : 'text-teal-deep'}>
+                  {ranges.length ? `sun hidden ${ranges.map(([a, b]) => `${formatHour(a)}–${formatHour(b)}`).join(', ')}` : 'full sun all day'}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </Card>
+
+      <div className="flex flex-col gap-5">
+      {standHere}
+      <Card className="flex flex-col gap-2">
+        <p className="text-base font-bold text-ink">Measure it with your phone (about 30 seconds)</p>
+        <SweepDemo />
+      </Card>
+      {scanAvailable && (
+        <div className="flex flex-col gap-2">
+          <Button onClick={() => void startScan()} className="min-h-14 text-lg">
+            <Camera className="size-5" aria-hidden="true" />
+            Scan with my phone
+          </Button>
+          <p className="text-sm text-ink-soft">Stand where your panels will go (the open part of the roof, not next to the tank or stair room), hold the button and slowly turn from east to west, tracing the top of the buildings and trees. About 30 seconds.</p>
+        </div>
+      )}
+      {/* On a laptop: pair a phone, scan with it, and watch the marks land here. */}
+      {!scanAvailable && <PairWithPhone stops={stops} baseHorizon={baseHorizon} onChange={onChange} />}
+      {scanNote && (
+        <p className="rounded-xl bg-teal-soft p-3 text-sm font-medium text-teal-deep" role="status">
+          {scanNote}
+        </p>
+      )}
+      {scanning && <PhoneScan onDone={finishScan} onCancel={() => setScanning(false)} />}
+      <div className="flex flex-col gap-2" role="group" aria-label="Quick choices">
+        {PRESETS.map((p) => (
+          <button
+            key={p.label}
+            type="button"
+            onClick={() => onChange(stops.map((s) => ({ ...s, elevation: p.heights[s.bearing] ?? s.elevation })))}
+            className="min-h-14 rounded-2xl border-2 border-input bg-white px-4 text-left text-base font-semibold text-ink hover:bg-sand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sun/40"
+          >
+            {p.label}
+            <span className="block text-sm font-normal text-ink-soft">{p.hint}</span>
+          </button>
+        ))}
+      </div>
+
+      <Card className="flex flex-col gap-2 bg-sun-soft">
+        <p className="text-lg font-bold text-ink">
+          {lossPct === 0 ? 'Your sky looks open: almost no sun is blocked.' : `Surroundings block about ${lossPct}% of your sun.`}
+        </p>
+        {lossPct > 0 && <p className="text-base text-ink">The tallest side is {direction}.</p>}
+        <Tag kind="estimate" className="self-start" />
+      </Card>
+
+      <section aria-label="Stops" className="flex flex-col gap-3">
+        <SectionTitle>Directions ({stops.length})</SectionTitle>
+        {dense && <p className="text-sm text-ink-soft">From your phone sweep. Drag any point on the chart up or down to fix it.</p>}
+        <div className={cn('flex flex-wrap gap-2', dense && 'hidden')}>
+          {sorted.map((s) => {
+            const edited = s.elevation !== s.scannedElevation
+            return (
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={s.id === selected?.id}
+                onClick={() => setSelectedId(s.id)}
+                className={cn(
+                  'min-h-12 rounded-2xl border-2 px-4 text-base font-semibold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sun/40',
+                  s.id === selected?.id ? 'border-teal-deep bg-teal-deep text-white' : 'border-input bg-white text-ink',
+                )}
+              >
+                {s.label} · {s.elevation}°{edited && <span className="sr-only"> edited</span>}
+                {edited && <span aria-hidden="true"> *</span>}
+              </button>
+            )
+          })}
+        </div>
+
+        {selected && (
+          <Card className="flex flex-col gap-3">
+            <NumberField
+              label={`${selected.label} skyline height`}
+              value={String(selected.elevation)}
+              onChange={(v) => v !== '' && setElevation(selected.id, Number(v))}
+              suffix="degrees"
+              min={0}
+              max={MAX_ELEV}
+              showInputTag={false}
+            />
+            <p className="text-sm text-ink-soft">Starting value: {selected.scannedElevation}°</p>
+            {selected.added && (
+              <Button variant="danger" onClick={() => removeStop(selected.id)}>
+                <Trash2 className="size-4" aria-hidden="true" />
+                Remove this direction
+              </Button>
+            )}
+          </Card>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="secondary" onClick={addStop} disabled={stops.length >= MAX_STOPS}>
+            <Plus className="size-4" aria-hidden="true" />
+            Add a direction
+          </Button>
+          <Button variant="secondary" onClick={onReset}>
+            <RotateCcw className="size-4" aria-hidden="true" />
+            Reset to open sky
+          </Button>
+        </div>
+      </section>
+
+      <Button onClick={onApply} className="min-h-14 text-lg">
+        See my solar plan
+      </Button>
+      {onSkip && (
+        <Button variant="ghost" onClick={onSkip}>
+          Skip, nothing tall around me
+        </Button>
+      )}
+      </div>
+    </div>
+  )
+}
