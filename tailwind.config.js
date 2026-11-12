@@ -37,6 +37,20 @@ export default {
           DEFAULT: "hsl(var(--card, 222 47% 13%))",
           foreground: "hsl(var(--card-foreground, 210 40% 98%))",
         },
+        // Rooftop Solar Planner color tokens
+        sun: {
+          DEFAULT: '#f59e0b',
+          dark: '#d97706',
+          soft: '#fef3c7',
+        },
+        'teal-deep': '#0f5c5e',
+        'teal-soft': '#e0efed',
+        cream: '#fff9ef',
+        sand: '#f6ead6',
+        ink: {
+          DEFAULT: '#2b2118',
+          soft: '#6a5a49',
+        },
       },
       borderRadius: {
         lg: "0.5rem",

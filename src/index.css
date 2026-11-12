@@ -71,3 +71,101 @@ body {
   color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
+
+/* -----------------------------------------------------------
+   High-Contrast Rooftop Solar Planner Scoped Styles
+----------------------------------------------------------- */
+.rooftop-container {
+  color: #1e1b18;
+  background-color: #f8f1e5;
+}
+
+.rooftop-container a {
+  color: #0f5c5e;
+}
+
+.rooftop-container a:hover {
+  color: #093738;
+}
+
+.rooftop-container .text-ink {
+  color: #1e1b18 !important;
+}
+
+.rooftop-container .text-ink-soft {
+  color: #52473d !important;
+}
+
+.rooftop-container .text-sun-dark {
+  color: #b45309 !important;
+}
+
+.rooftop-container .bg-cream {
+  background-color: #fffaf2 !important;
+}
+
+.rooftop-container .bg-sand {
+  background-color: #f8f1e5 !important;
+}
+
+.rooftop-container .bg-sun {
+  background-color: #f59e0b !important;
+  color: #1e1b18 !important;
+}
+
+.rooftop-container .bg-sun-soft {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.rooftop-container .bg-teal-deep {
+  background-color: #0f5c5e !important;
+  color: #ffffff !important;
+}
+
+.rooftop-container .bg-teal-soft {
+  background-color: #d8ece9 !important;
+  color: #0f5c5e !important;
+}
+
+.rooftop-container .border-border {
+  border-color: #e5d7c3 !important;
+}
+
+.rooftop-container input[type="text"],
+.rooftop-container input[type="number"],
+.rooftop-container select,
+.rooftop-container textarea {
+  color: #1e1b18 !important;
+  background-color: #ffffff !important;
+  border: 1.5px solid #d4c2aa !important;
+}
+
+.rooftop-container input[type="text"]:focus,
+.rooftop-container input[type="number"]:focus,
+.rooftop-container select:focus,
+.rooftop-container textarea:focus {
+  border-color: #f59e0b !important;
+  outline: 2px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.rooftop-container input::placeholder {
+  color: #8a7c6e !important;
+}
+
+.rooftop-container button.bg-sun {
+  color: #1e1b18 !important;
+  font-weight: 700 !important;
+}
+
+.rooftop-container button.bg-teal-deep {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.rooftop-container .card,
+.rooftop-container [class*="rounded-"][class*="bg-cream"],
+.rooftop-container [class*="rounded-"][class*="bg-white"] {
+  color: #1e1b18;
+  border-color: #e8dbca;
+}

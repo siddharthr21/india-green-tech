@@ -132,19 +132,29 @@ app.post('/api/smart-city/simulate', (req, res) => {
 // ----------------------------------------------------
 // 4. Rooftop Solar & Subsidy Endpoints
 // ----------------------------------------------------
-let referenceData: any = null;
-try {
-  const refPath = path.resolve(__dirname, 'reference.json');
-  if (fs.existsSync(refPath)) {
-    referenceData = JSON.parse(fs.readFileSync(refPath, 'utf-8'));
+function getReferenceData() {
+  const possiblePaths = [
+    path.resolve(__dirname, 'reference.json'),
+    path.resolve(__dirname, '../../server/reference.json'),
+    path.resolve(process.cwd(), 'server/reference.json'),
+    path.resolve(process.cwd(), 'dist/server/reference.json')
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        return JSON.parse(fs.readFileSync(p, 'utf-8'));
+      } catch (e) {
+        console.warn('Error reading reference json at', p, e);
+      }
+    }
   }
-} catch (e) {
-  console.warn('Could not read reference.json:', e);
+  return null;
 }
 
 app.get(['/reference', '/api/reference'], (req, res) => {
-  if (referenceData) {
-    res.json(referenceData);
+  const ref = getReferenceData();
+  if (ref) {
+    res.json(ref);
   } else {
     res.status(404).json({ error: 'reference_not_found', hint: 'Reference data file not found' });
   }
