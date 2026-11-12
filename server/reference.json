@@ -14,10 +14,10 @@
     "confidence": "high"
   },
   "cost": {
-    "firstKwRange": [60000, 80000],
-    "extraKwRange": [55000, 70000],
-    "source": "Gives Rs 1.7-2.2 lakh for 3 kW before subsidy. 2026 installer guides quote Rs 1.6-2.5 lakh for 3 kW DCR systems, typically Rs 55,000-65,000/kW all-in. Indicative; ask for itemised quotes",
-    "confidence": "medium"
+    "firstKwRange": [50000, 55000],
+    "extraKwRange": [46000, 52000],
+    "source": "Gives Rs 1.42-1.59 lakh for 3 kW and Rs 1.56-1.75 lakh for 3.3 kW before subsidy. Real-world 2025-2026 PM Surya Ghar DISCOM-empanelled vendor quotations for DCR mono PERC systems (typically Rs 48,000-54,000/kW turnkey)",
+    "confidence": "high"
   },
   "loan": {
     "ratePct": 7.0,

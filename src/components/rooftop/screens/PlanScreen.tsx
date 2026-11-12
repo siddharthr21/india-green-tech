@@ -368,21 +368,39 @@ export function PlanScreen({
         <Tag kind="estimate" className="self-start bg-white text-teal-deep ring-white" />
       </section>
 
-      <section aria-label="Your numbers" className="grid grid-cols-2 gap-3">
-        <StatCard label="Cost" value={lakhRange(finance.costRange)} note="before subsidy" tag="estimate" />
-        <StatCard
-          label="Subsidy"
-          value={eligible ? inr(finance.subsidy) : 'Not eligible'}
-          note="PM Surya Ghar"
-          tag="estimate"
-        />
-        <StatCard
-          label="Saves you"
-          value={`${inr(finance.savingsYearRange[0])}${finance.savingsYearRange[1] !== finance.savingsYearRange[0] ? '–' + num(finance.savingsYearRange[1]) : ''}`}
-          note="each year"
-          tag="estimate"
-        />
-        <StatCard label="Pays back in" value={yearsRange(finance.paybackRange)} note="after subsidy" tag="estimate" />
+      <section aria-label="Your numbers" className="flex flex-col gap-3">
+        {/* Prominent Effective Investment / Net Cost Card */}
+        <div className="flex flex-col gap-1 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 p-4 ring-1 ring-emerald-600/20 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">Your Effective Cost</span>
+            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+              After PM Surya Ghar Subsidy
+            </span>
+          </div>
+          <p className="text-3xl font-extrabold text-emerald-950 mt-1">
+            {lakhRange(finance.netCostRange)}
+          </p>
+          <p className="text-xs text-ink-soft">
+            Total turnkey {lakhRange(finance.costRange)} minus {eligible ? inr(finance.subsidy) : '₹0'} direct central/state subsidy
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard label="Gross Turnkey Cost" value={lakhRange(finance.costRange)} note="before subsidy" tag="estimate" />
+          <StatCard
+            label="Govt Subsidy"
+            value={eligible ? inr(finance.subsidy) : 'Not eligible'}
+            note="PM Surya Ghar CFA"
+            tag="estimate"
+          />
+          <StatCard
+            label="Annual Savings"
+            value={`${inr(finance.savingsYearRange[0])}${finance.savingsYearRange[1] !== finance.savingsYearRange[0] ? '–' + num(finance.savingsYearRange[1]) : ''}`}
+            note="saved on power bills"
+            tag="estimate"
+          />
+          <StatCard label="Pays back in" value={yearsRange(finance.paybackRange)} note="full cost recovery" tag="estimate" />
+        </div>
       </section>
 
       {loan && (

@@ -5,7 +5,7 @@ import type { FinanceParams } from './mockData'
 export const FALLBACK_REFERENCE: ReferenceData = {
   panel: { widthM: 1.13, lengthM: 2.28, gapM: 0.03, kWp: 0.55 },
   subsidy: { centralPerKwFirst2: 30000, centralThirdKw: 18000, centralCap: 78000, residentialOnly: true },
-  cost: { firstKwRange: [60000, 80000], extraKwRange: [55000, 70000] },
+  cost: { firstKwRange: [50000, 55000], extraKwRange: [46000, 52000] },
   co2: { kgPerKwh: 0.71 },
   loan: { ratePct: 7.0, years: 10, maxAmount: 200000 },
   defaults: { avgTariff: 7.0, performanceKwhPerKwp: 1450 },

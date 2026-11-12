@@ -50,6 +50,7 @@ function planFacts(plan: PlanModel, lang: Lang, loan: LoanPlan | null): (readonl
     [t(lang, 'yearlyEnergy'), unitsYear(numbers.kWhFinal, lang)],
     [t(lang, 'cost'), lakhRange(finance.costRange, lang)],
     [t(lang, 'subsidy'), finance.eligible ? inr(finance.subsidy) : '₹0'],
+    [t(lang, 'netCost'), lakhRange(finance.netCostRange, lang)],
     [t(lang, 'payback'), yearsRange(finance.paybackRange, lang)],
   ]
   if (loan) {

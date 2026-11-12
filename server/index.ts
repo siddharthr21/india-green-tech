@@ -395,16 +395,19 @@ app.post(['/finance', '/api/finance'], (req, res) => {
 
   // State subsidies
   let stateSubsidy = 0;
-  if (state === 'DL') stateSubsidy = Math.min(10000, Math.round(kwp * 2000));
-  else if (state === 'UP') stateSubsidy = Math.min(30000, Math.round(kwp * 5000));
+  if (state === 'DL') stateSubsidy = Math.min(30000, Math.round(kwp * 10000));
+  else if (state === 'UP') stateSubsidy = Math.min(30000, Math.round(kwp * 15000));
 
   const subsidy = central + stateSubsidy;
-  const costLow = Math.round(kwp * 50000);
-  const costHigh = Math.round(kwp * 60000);
+  const firstKw = Math.min(kwp, 1);
+  const extraKw = Math.max(0, kwp - 1);
+  const costLow = Math.round(firstKw * 50000 + extraKw * 46000);
+  const costHigh = Math.round(firstKw * 55000 + extraKw * 52000);
   const netLow = Math.max(0, costLow - subsidy);
   const netHigh = Math.max(0, costHigh - subsidy);
 
-  const tariff = state === 'DL' ? 7.5 : state === 'KA' ? 7.2 : state === 'MH' ? 8.5 : 6.8;
+  const ref = getReferenceData();
+  const tariff = ref?.states?.[state]?.avgTariff ?? (state === 'MH' ? 9.0 : state === 'KA' ? 7.0 : 6.8);
   const offsetKwhYear = Math.round(kwp * 1450);
   const savingsYear = Math.round(offsetKwhYear * tariff);
 
