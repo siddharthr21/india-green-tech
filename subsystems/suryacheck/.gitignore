@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build output
+.next/
+out/
+dist/
+*.tsbuildinfo
+.aws-sam/
+
+# Secrets and local config (never commit these)
+.env
+.env.local
+.env*.local
+samconfig.toml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# AWS deploy staging (infra/deploy.ps1)
+infra/build/

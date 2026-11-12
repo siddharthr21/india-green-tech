@@ -1,0 +1,42 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+logs/
+node_modules/
+.next/
+
+# Local editor preferences and generated analysis/deck outputs
+.claude/settings.local.json
+.tmp_*/
+*.pptx
+*.pptx.inspect.ndjson
+*_results.csv
+vessel_data.csv
+
+# secrets — never commit; keep only the template
+.env
+.env.*
+!.env.example
+
+# SSH / TLS private keys (e.g. an EC2 .pem left in the project folder)
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# DB dumps and any bulk archive
+*.dump
+*.sql.gz
+
+# recon sample binaries are kept on disk, not in git — except the two small
+# fixtures the parser tests load
+docs/sources/*.pdf
+docs/sources/*.jpg
+docs/sources/*.jpeg
+docs/sources/*.png
+docs/sources/*.xls
+docs/sources/*.xlsx
+!docs/sources/NRLDC_daily100626.pdf
+!docs/sources/NPP_dgr2_100626.xls
+!docs/sources/CEA_IC_July2026.xlsx
