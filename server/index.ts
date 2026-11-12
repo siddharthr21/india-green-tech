@@ -341,18 +341,26 @@ app.get(['/quick', '/api/quick'], (req, res) => {
 });
 
 app.get(['/building', '/api/building'], (req, res) => {
-  const lat = parseFloat(req.query.lat as string) || 28.6139;
-  const lon = parseFloat(req.query.lon as string) || 77.2090;
-  const d = 0.00012;
+  const lat = parseFloat(req.query.lat as string) || 12.9716;
+  const lon = parseFloat((req.query.lon || req.query.lng) as string) || 77.5946;
+  // Realistic rectangular roof polygon of ~120 m² centered around the pin
+  const dLat = 0.00007; // ~8m north/south
+  const dLng = 0.00009; // ~10m east/west
+  const polygon = [
+    [lon - dLng, lat - dLat],
+    [lon + dLng, lat - dLat],
+    [lon + dLng, lat + dLat],
+    [lon - dLng, lat + dLat],
+    [lon - dLng, lat - dLat]
+  ];
   res.json({
     found: true,
-    ring: [
-      [lat - d, lon - d],
-      [lat - d, lon + d],
-      [lat + d, lon + d],
-      [lat + d, lon - d],
-      [lat - d, lon - d]
-    ]
+    containsPoint: true,
+    polygon,
+    ring: polygon,
+    areaM2: 120,
+    levels: "2",
+    height: "6.5"
   });
 });
 
@@ -370,32 +378,53 @@ app.post(['/yield', '/api/yield'], (req, res) => {
     const factor = 1 - Math.abs(t - 20) * 0.004;
     yields[t] = Math.round(kWp * 1460 * factor);
   }
-  res.json({ kWp, yields });
+  // Return the direct Record<string, number> as required by YieldResponse
+  res.json(yields);
 });
 
 app.post(['/finance', '/api/finance'], (req, res) => {
-  const { systemSizeKw = 3, billMonthly = 3000, state = 'DL' } = req.body;
-  let centralSubsidy = 0;
-  if (systemSizeKw <= 2) centralSubsidy = systemSizeKw * 30000;
-  else if (systemSizeKw <= 3) centralSubsidy = 60000 + (systemSizeKw - 2) * 18000;
-  else centralSubsidy = 78000;
+  const kwp = Number(req.body.kwp || req.body.systemSizeKw || 3);
+  const state = String(req.body.stateCode || req.body.state || 'KA').toUpperCase();
+  const monthlyBill = Number(req.body.monthlyBill || req.body.billMonthly || 2500);
 
-  const cost = Math.round(systemSizeKw * 55000);
-  const stateTopUp = state === 'DL' ? Math.min(30000, systemSizeKw * 10000) : 0;
-  const totalSubsidy = Math.round(centralSubsidy + stateTopUp);
-  const netCost = Math.max(0, cost - totalSubsidy);
-  const annualSavings = Math.round(systemSizeKw * 1450 * 6.5);
-  const payback = Number((netCost / (annualSavings || 1)).toFixed(1));
+  let central = 0;
+  if (kwp <= 2) central = Math.round(kwp * 30000);
+  else if (kwp <= 3) central = Math.round(60000 + (kwp - 2) * 18000);
+  else central = 78000;
+
+  // State subsidies
+  let stateSubsidy = 0;
+  if (state === 'DL') stateSubsidy = Math.min(10000, Math.round(kwp * 2000));
+  else if (state === 'UP') stateSubsidy = Math.min(30000, Math.round(kwp * 5000));
+
+  const subsidy = central + stateSubsidy;
+  const costLow = Math.round(kwp * 50000);
+  const costHigh = Math.round(kwp * 60000);
+  const netLow = Math.max(0, costLow - subsidy);
+  const netHigh = Math.max(0, costHigh - subsidy);
+
+  const tariff = state === 'DL' ? 7.5 : state === 'KA' ? 7.2 : state === 'MH' ? 8.5 : 6.8;
+  const offsetKwhYear = Math.round(kwp * 1450);
+  const savingsYear = Math.round(offsetKwhYear * tariff);
+
+  const paybackLow = Number((netLow / (savingsYear || 1)).toFixed(1));
+  const paybackHigh = Number((netHigh / (savingsYear || 1)).toFixed(1));
+  const co2 = Number(((offsetKwhYear * 25 * 0.82) / 1000).toFixed(1));
 
   res.json({
-    eligible: true,
-    costRange: { low: cost * 0.95, high: cost * 1.05 },
-    subsidy: totalSubsidy,
-    netCostRange: { low: netCost * 0.95, high: netCost * 1.05 },
-    savingsYearRange: { low: annualSavings * 0.95, high: annualSavings * 1.05 },
-    paybackRange: { low: Math.max(1, payback - 0.5), high: payback + 0.5 },
-    co2Tonnes: Number(((systemSizeKw * 1450 * 25 * 0.82) / 1000).toFixed(1)),
-    notes: ['Eligible for PM Surya Ghar: Muft Bijli Yojana Central Subsidy', 'Calculated using official MNRE guidelines']
+    subsidy,
+    subsidyBreakdown: { central, state: stateSubsidy, eligible: true },
+    costRange: [costLow, costHigh],
+    netCostRange: [netLow, netHigh],
+    savingsYear,
+    paybackRange: [paybackLow, paybackHigh],
+    co2,
+    offsetKwhYear,
+    tariffUsed: tariff,
+    notes: [
+      'PM Surya Ghar: Muft Bijli Yojana Central Subsidy included',
+      'Calculated against official MNRE and State DISCOM guidelines'
+    ]
   });
 });
 

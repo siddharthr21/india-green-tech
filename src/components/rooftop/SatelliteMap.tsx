@@ -246,15 +246,17 @@ export function SatelliteMap({
   useEffect(() => {
     fitNow()
   }, [fitKey, fitNow])
-  const lastCenterRef = useRef<{ lat: number; lng: number }>({ lat: frame.lat, lng: frame.lng })
+
   useEffect(() => {
     const map = mapRef.current
     if (map) {
-      const dLat = Math.abs(frame.lat - lastCenterRef.current.lat)
-      const dLng = Math.abs(frame.lng - lastCenterRef.current.lng)
-      if (dLat > 0.00008 || dLng > 0.00008) {
-        lastCenterRef.current = { lat: frame.lat, lng: frame.lng }
-        map.setView([frame.lat, frame.lng], map.getZoom(), { animate: true })
+      const c = map.getCenter()
+      const dLat = Math.abs(frame.lat - c.lat)
+      const dLng = Math.abs(frame.lng - c.lng)
+      // Only setView if the map center is genuinely different from frame (> 12m away)
+      // (i.e. frame was changed externally by search or GPS/IP location, NOT by dragging)
+      if (dLat > 0.0001 || dLng > 0.0001) {
+        map.setView([frame.lat, frame.lng], map.getZoom(), { animate: false })
       }
     }
     sync()
