@@ -344,35 +344,71 @@ export function Landing({ onPlace }: { onPlace: (place: Place) => void }) {
     }
   }
 
-  const locate = () => {
-    if (!('geolocation' in navigator)) {
-      setError('This browser cannot share your location. Please type your address.')
-      return
-    }
+  const locate = async () => {
     setBusy('locate')
     setError('')
     setChoices([])
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        const here: Place = { address: 'Your current location', city: '', lat: coords.latitude, lng: coords.longitude, stateCode: '' }
-        try {
-          onPlace((await api.reverse(coords.latitude, coords.longitude)) ?? here)
-        } catch {
-          onPlace(here) // a failed lookup must not block someone whose position we know
-        } finally {
-          setBusy(null)
-        }
-      },
-      (err) => {
+
+    const navigateWithCoords = async (lat: number, lng: number, fallbackLabel?: string) => {
+      const fallback: Place = {
+        address: fallbackLabel || 'Your Current Location',
+        city: '',
+        lat,
+        lng,
+        stateCode: 'KA',
+      }
+      try {
+        const place = await api.reverse(lat, lng)
+        onPlace(place || fallback)
+      } catch {
+        onPlace(fallback)
+      } finally {
         setBusy(null)
-        setError(
-          err.code === err.PERMISSION_DENIED
-            ? 'Location is switched off for this site. Please type your address instead.'
-            : 'We could not work out where you are. Please type your address.',
-        )
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
-    )
+      }
+    }
+
+    const tryIpFallback = async () => {
+      try {
+        const ipLoc = await api.locate()
+        if (ipLoc && ipLoc.lat && ipLoc.lng) {
+          onPlace(ipLoc)
+          setBusy(null)
+          return
+        }
+      } catch {}
+      // Last-resort fallback: major Indian urban center
+      await navigateWithCoords(12.9716, 77.5946, 'Bengaluru, Karnataka, India')
+    }
+
+    if ('geolocation' in navigator) {
+      let resolved = false
+      const timer = setTimeout(async () => {
+        if (!resolved) {
+          resolved = true
+          await tryIpFallback()
+        }
+      }, 3500)
+
+      navigator.geolocation.getCurrentPosition(
+        async ({ coords }) => {
+          if (!resolved) {
+            resolved = true
+            clearTimeout(timer)
+            await navigateWithCoords(coords.latitude, coords.longitude)
+          }
+        },
+        async () => {
+          if (!resolved) {
+            resolved = true
+            clearTimeout(timer)
+            await tryIpFallback()
+          }
+        },
+        { enableHighAccuracy: false, timeout: 3000, maximumAge: 300000 }
+      )
+    } else {
+      await tryIpFallback()
+    }
   }
 
   return (

@@ -194,17 +194,141 @@ app.get(['/geocode', '/api/geocode', '/suggest', '/api/suggest'], async (req, re
   res.json(matched.length > 0 ? matched : presets.slice(0, 3));
 });
 
-app.get(['/reverse', '/api/reverse'], (req, res) => {
-  const lat = parseFloat(req.query.lat as string) || 28.6139;
-  const lon = parseFloat(req.query.lon as string) || 77.2090;
+// ----------------------------------------------------
+// Location & Geocoding Endpoints
+// ----------------------------------------------------
+app.get(['/api/locate', '/locate'], async (req, res) => {
+  try {
+    const ipRes = await fetch('https://ipapi.co/json/', {
+      headers: { 'User-Agent': 'IndiaGreenTech/1.0 (clean-energy-platform)' },
+      signal: AbortSignal.timeout(3500)
+    });
+    if (ipRes.ok) {
+      const data: any = await ipRes.json();
+      if (data && data.latitude && data.longitude) {
+        return res.json({
+          found: true,
+          city: data.city || 'Bengaluru',
+          state: data.region || 'Karnataka',
+          stateCode: data.region_code || 'KA',
+          postal: data.postal || '',
+          name: `${data.city || 'Local Area'}, ${data.region || 'Karnataka'}, India`,
+          lat: data.latitude,
+          lon: data.longitude
+        });
+      }
+    }
+  } catch (err) {
+    // try fallback
+  }
+
+  try {
+    const altRes = await fetch('https://freeipapi.com/api/json', {
+      signal: AbortSignal.timeout(3000)
+    });
+    if (altRes.ok) {
+      const d: any = await altRes.json();
+      if (d && d.latitude && d.longitude) {
+        return res.json({
+          found: true,
+          city: d.cityName || 'Bengaluru',
+          state: d.regionName || 'Karnataka',
+          stateCode: d.regionCode || 'KA',
+          postal: d.zipCode || '',
+          name: `${d.cityName || 'Urban Area'}, ${d.regionName || 'Karnataka'}, India`,
+          lat: d.latitude,
+          lon: d.longitude
+        });
+      }
+    }
+  } catch (err) {}
+
+  // Safe geographic fallback if offline (Bengaluru central)
   res.json({
     found: true,
-    name: 'Sector 14, Urban Area, India',
+    city: 'Bengaluru',
+    state: 'Karnataka',
+    stateCode: 'KA',
+    postal: '560001',
+    name: 'MG Road, Bengaluru, Karnataka, 560001',
+    lat: 12.9716,
+    lon: 77.5946
+  });
+});
+
+app.get(['/reverse', '/api/reverse'], async (req, res) => {
+  const lat = parseFloat(req.query.lat as string) || 12.9716;
+  const lon = parseFloat((req.query.lon || req.query.lng) as string) || 77.5946;
+
+  try {
+    const fetchRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
+      headers: { 'User-Agent': 'IndiaGreenTech/1.0 (clean-energy-platform)' },
+      signal: AbortSignal.timeout(3500)
+    });
+    if (fetchRes.ok) {
+      const data: any = await fetchRes.json();
+      const addr = data.address || {};
+      const city = addr.city || addr.town || addr.village || addr.county || addr.state_district || 'Local Area';
+      const state = addr.state || 'Karnataka';
+
+      const stateMap: Record<string, string> = {
+        'Karnataka': 'KA', 'Delhi': 'DL', 'Maharashtra': 'MH', 'Tamil Nadu': 'TN',
+        'Gujarat': 'GJ', 'Rajasthan': 'RJ', 'Uttar Pradesh': 'UP', 'Telangana': 'TS',
+        'Andhra Pradesh': 'AP', 'Kerala': 'KL', 'West Bengal': 'WB', 'Punjab': 'PB',
+        'Haryana': 'HR', 'Madhya Pradesh': 'MP', 'Bihar': 'BR', 'Odisha': 'OD'
+      };
+      const stateCode = stateMap[state] || 'KA';
+      const name = data.display_name || `${city}, ${state}, India`;
+
+      return res.json({
+        found: true,
+        name,
+        lat,
+        lon,
+        state,
+        stateCode,
+        city
+      });
+    }
+  } catch (err) {
+    // fallback if external API is slow or unreachable
+  }
+
+  // Coordinate-based Indian city resolution fallback
+  let city = 'Bengaluru';
+  let state = 'Karnataka';
+  let stateCode = 'KA';
+
+  if (lat >= 12.0 && lat <= 13.6 && lon >= 77.0 && lon <= 78.0) {
+    city = 'Bengaluru';
+    state = 'Karnataka';
+    stateCode = 'KA';
+  } else if (lat >= 28.3 && lat <= 28.9 && lon >= 76.8 && lon <= 77.4) {
+    city = 'New Delhi';
+    state = 'Delhi';
+    stateCode = 'DL';
+  } else if (lat >= 18.8 && lat <= 19.4 && lon >= 72.7 && lon <= 73.2) {
+    city = 'Mumbai';
+    state = 'Maharashtra';
+    stateCode = 'MH';
+  } else if (lat >= 12.8 && lat <= 13.3 && lon >= 80.0 && lon <= 80.4) {
+    city = 'Chennai';
+    state = 'Tamil Nadu';
+    stateCode = 'TN';
+  } else if (lat >= 17.2 && lat <= 17.6 && lon >= 78.2 && lon <= 78.6) {
+    city = 'Hyderabad';
+    state = 'Telangana';
+    stateCode = 'TS';
+  }
+
+  res.json({
+    found: true,
+    name: `${city}, ${state}, India`,
     lat,
     lon,
-    state: 'Delhi',
-    stateCode: 'DL',
-    city: 'New Delhi'
+    state,
+    stateCode,
+    city
   });
 });
 

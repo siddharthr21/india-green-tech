@@ -138,6 +138,14 @@ export interface ReferenceData {
 }
 
 export const api = {
+  async locate(signal?: AbortSignal): Promise<Place | null> {
+    try {
+      const r = await request<PlaceRow & { found: boolean }>('/api/locate', {}, signal)
+      return r.found ? toPlace(r) : null
+    } catch {
+      return null
+    }
+  },
   async geocode(q: string, signal?: AbortSignal): Promise<Place[]> {
     const rows = await request<PlaceRow[]>(`/geocode?q=${encodeURIComponent(q)}`, {}, signal)
     return rows.map(toPlace)

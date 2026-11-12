@@ -1,5 +1,5 @@
-import { ArrowRight, Info, MapPin, LocateFixed } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { ArrowRight, Info, MapPin, LocateFixed, LoaderCircle } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Button } from '../Button'
 import { Card } from '../Card'
 import { SatelliteMap } from '../SatelliteMap'
@@ -7,6 +7,7 @@ import { NumberField } from '../NumberField'
 import { Segmented, YesNo } from '../Segmented'
 import { Tag } from '../Tag'
 import { num } from '@/lib/format'
+import { api } from '@/lib/api'
 import type { GeoFrame, LngLat } from '@/lib/geo'
 import type { LocationData } from '@/lib/mockData'
 import type { UserInputs } from '@/lib/plan'
@@ -50,6 +51,57 @@ export function WhereYouLive({
     })
   }
 
+  const [locating, setLocating] = useState(false)
+
+  const handleLocate = async () => {
+    setLocating(true)
+    const jumpTo = (lat: number, lng: number) => {
+      onPinMove({ lat, lng })
+      setLocating(false)
+    }
+
+    const fallbackToIp = async () => {
+      try {
+        const ipLoc = await api.locate()
+        if (ipLoc && ipLoc.lat && ipLoc.lng) {
+          jumpTo(ipLoc.lat, ipLoc.lng)
+          return
+        }
+      } catch {}
+      jumpTo(12.9716, 77.5946)
+    }
+
+    if ('geolocation' in navigator) {
+      let resolved = false
+      const timer = setTimeout(async () => {
+        if (!resolved) {
+          resolved = true
+          await fallbackToIp()
+        }
+      }, 3500)
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          if (!resolved) {
+            resolved = true
+            clearTimeout(timer)
+            jumpTo(coords.latitude, coords.longitude)
+          }
+        },
+        async () => {
+          if (!resolved) {
+            resolved = true
+            clearTimeout(timer)
+            await fallbackToIp()
+          }
+        },
+        { enableHighAccuracy: false, timeout: 3000, maximumAge: 300000 }
+      )
+    } else {
+      await fallbackToIp()
+    }
+  }
+
   return (
     <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start lg:gap-8">
       <div className="flex flex-col gap-5 lg:sticky lg:top-[5.5rem]">
@@ -70,20 +122,13 @@ export function WhereYouLive({
         </p>
         <button
           type="button"
-          onClick={() => {
-            if ('geolocation' in navigator) {
-              navigator.geolocation.getCurrentPosition(
-                ({ coords }) => onPinMove({ lat: coords.latitude, lng: coords.longitude }),
-                () => {},
-                { enableHighAccuracy: true, timeout: 15000 }
-              )
-            }
-          }}
-          className="absolute right-3 top-3 z-[600] flex items-center gap-1.5 rounded-2xl bg-white px-3 py-1.5 text-xs font-bold text-teal-deep shadow-md hover:bg-teal-soft transition border border-teal-deep/30"
-          title="Jump to current GPS location"
+          disabled={locating}
+          onClick={handleLocate}
+          className="absolute right-3 top-3 z-[600] flex items-center gap-1.5 rounded-2xl bg-white px-3 py-1.5 text-xs font-bold text-teal-deep shadow-md hover:bg-teal-soft transition border border-teal-deep/30 disabled:opacity-70"
+          title="Jump to current GPS/IP location"
         >
-          <LocateFixed className="size-4 text-teal-deep" />
-          <span>Current Location</span>
+          {locating ? <LoaderCircle className="size-4 animate-spin text-teal-deep" /> : <LocateFixed className="size-4 text-teal-deep" />}
+          <span>{locating ? 'Locating…' : 'Current Location'}</span>
         </button>
       </div>
       </div>

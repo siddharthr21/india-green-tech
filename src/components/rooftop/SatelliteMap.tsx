@@ -246,7 +246,17 @@ export function SatelliteMap({
   useEffect(() => {
     fitNow()
   }, [fitKey, fitNow])
+  const lastCenterRef = useRef<{ lat: number; lng: number }>({ lat: frame.lat, lng: frame.lng })
   useEffect(() => {
+    const map = mapRef.current
+    if (map) {
+      const dLat = Math.abs(frame.lat - lastCenterRef.current.lat)
+      const dLng = Math.abs(frame.lng - lastCenterRef.current.lng)
+      if (dLat > 0.00008 || dLng > 0.00008) {
+        lastCenterRef.current = { lat: frame.lat, lng: frame.lng }
+        map.setView([frame.lat, frame.lng], map.getZoom(), { animate: true })
+      }
+    }
     sync()
   }, [frame.lat, frame.lng, sync])
   useEffect(() => {
