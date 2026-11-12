@@ -343,9 +343,9 @@ app.get(['/quick', '/api/quick'], (req, res) => {
 app.get(['/building', '/api/building'], (req, res) => {
   const lat = parseFloat(req.query.lat as string) || 12.9716;
   const lon = parseFloat((req.query.lon || req.query.lng) as string) || 77.5946;
-  // Realistic rectangular roof polygon of ~120 m² centered around the pin
-  const dLat = 0.00007; // ~8m north/south
-  const dLng = 0.00009; // ~10m east/west
+  // Realistic rectangular roof polygon of ~116 m² (11.2m x 10.4m) centered around the pin
+  const dLat = 0.000047; // ~5.2m north/south
+  const dLng = 0.000052; // ~5.6m east/west
   const polygon = [
     [lon - dLng, lat - dLat],
     [lon + dLng, lat - dLat],
@@ -358,7 +358,7 @@ app.get(['/building', '/api/building'], (req, res) => {
     containsPoint: true,
     polygon,
     ring: polygon,
-    areaM2: 120,
+    areaM2: 116,
     levels: "2",
     height: "6.5"
   });
@@ -372,11 +372,12 @@ app.get(['/monthly', '/api/monthly'], (req, res) => {
 });
 
 app.post(['/yield', '/api/yield'], (req, res) => {
-  const { kWp = 3, tilts = [5, 10, 15, 20, 25, 30, 35] } = req.body;
+  const { tilts = [5, 10, 15, 20, 25, 30, 35] } = req.body;
   const yields: Record<string, number> = {};
   for (const t of tilts) {
     const factor = 1 - Math.abs(t - 20) * 0.004;
-    yields[t] = Math.round(kWp * 1460 * factor);
+    // Normalized annual kWh per 1 kWp for Indian insolation (~1,450 kWh/kWp/year)
+    yields[t] = Math.round(1450 * factor);
   }
   // Return the direct Record<string, number> as required by YieldResponse
   res.json(yields);
